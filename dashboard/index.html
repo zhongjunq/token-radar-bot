@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>TOKEN RADAR</h1>
+    <p class="tag">Every pre-token protocol, priced like the market prices its kind.</p>
+  </div>
+  <div class="meta" id="meta">
+    <span class="pill" id="pill-model">model radar-2</span>
+    <span class="pill" id="pill-asof">snapshot —</span>
+    <span class="pill" id="pill-count">— rows</span>
+  </div>
+</header>
+<nav class="tabs" aria-label="Views">
+  <button type="button" data-view="board" class="tab active">Board</button>
+  <button type="button" data-view="live" class="tab">Already trading</button>
+  <button type="button" data-view="model" class="tab">How it is priced</button>
+</nav>
+<main>
+  <section id="view-board" class="view">
+    <div class="filters" role="search">
+      <label>Search <input id="f-search" type="search" placeholder="protocol name or slug" autocomplete="off"></label>
+      <label>Category
+        <select id="f-category"><option value="">All categories</option></select>
+      </label>
+      <label>Chain
+        <select id="f-chain"><option value="">All chains</option></select>
+      </label>
+      <label>Sort by
+        <select id="f-sort">
+          <option value="implied">Implied value ↓</option>
+          <option value="tvl">TVL ↓</option>
+          <option value="growth">7-day change ↓</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </label>
+      <label class="check"><input id="f-floor" type="checkbox"> TVL ≥ $50M floor only</label>
+    </div>
+    <p class="count" id="board-count"></p>
+    <div class="table-wrap">
+      <table id="board-table">
+        <thead>
+          <tr>
+            <th data-sort="rank" class="num">#</th>
+            <th data-sort="name">Protocol</th>
+            <th data-sort="category">Category</th>
+            <th>Chains</th>
+            <th data-sort="tvl" class="num">TVL</th>
+            <th data-sort="growth" class="num">7d</th>
+            <th data-sort="implied" class="num">Implied value</th>
+            <th data-sort="multiple" class="num">Multiple</th>
+          </tr>
+        </thead>
+        <tbody id="board-body"></tbody>
+      </table>
+    </div>
+    <p class="foot">Implied value is the model's estimate of what a launch would be worth, not a price and not a promise. Click a row for the breakdown and the farm plan.</p>
+  </section>
+
+  <section id="view-detail" class="view" hidden>
+    <p><button type="button" class="back" id="detail-back">← Back to the board</button></p>
+    <div class="detail-head">
+      <div>
+        <h2 id="d-name">—</h2>
+        <p class="sub" id="d-sub">—</p>
+      </div>
+      <div class="big-value">
+        <span class="label">Implied value</span>
+        <strong id="d-implied">—</strong>
+        <span class="label" id="d-rank">—</span>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <h3>How the number is built</h3>
+        <table class="model-table">
+          <thead><tr><th>Step</th><th class="num">Value</th><th>What it means</th></tr></thead>
+          <tbody id="d-model"></tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Farm plan — six steps</h3>
+        <p class="foot">Derived from this protocol's own record — never pay for a claim.</p>
+        <ol class="steps" id="d-steps"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-live" class="view" hidden>
+    <p class="banner">These protocols already trade. The values below are <strong>market values</strong> — live market capitalisation from the same snapshot — <strong>not</strong> the model's implied values. They are the comparables the model prices pre-token protocols against.</p>
+    <div class="table-wrap">
+      <table id="live-table">
+        <thead>
+          <tr>
+            <th class="num">#</th><th>Protocol</th><th>Category</th><th>Chains</th>
+            <th class="num">TVL</th><th class="num">Market cap</th><th class="num">Mcap / TVL</th><th class="num">7d</th>
+          </tr>
+        </thead>
+        <tbody id="live-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="view-model" class="view" hidden>
+    <h2>How it is priced — model radar-2</h2>
+    <p>A token is worth what the market already pays for the same kind of protocol, per dollar of TVL. The model never special-cases a protocol by name.</p>
+    <table class="model-table">
+      <thead><tr><th>Step</th><th class="num">Value</th><th>What it means</th></tr></thead>
+      <tbody id="model-body"></tbody>
+    </table>
+    <h3>What is ranked, and what is left out</h3>
+    <ul class="notes">
+      <li>The board ranks every protocol on the snapshot's watchlist, plus every other pre-token protocol the rule keeps — 198 rows in this snapshot, not just the 40 on the watchlist.</li>
+      <li>Left out: wrapped, staked and bridged products, versioned pools, exchange-named protocols, and the bridge, liquid staking, restaking and CEX categories. A launch cannot be scored from a product of a token that already trades.</li>
+      <li>Multiple: the median market-cap-per-TVL of live-token protocols in the same category (at least five of them), otherwise the global median. Clamped to 0.05–3.0 so one outlier cannot set the price.</li>
+      <li>Growth: 7-day TVL change, clamped to −60%…+120%, at half weight. Maturity: 0.6 at listing, rising to 1.0 over three years; unknown age counts as one year. Breadth: +2% per extra chain, up to five.</li>
+      <li>Implied value is floored at $1. Figures come from the sealed DefiLlama snapshot dated <span id="model-asof">—</span>; nothing is fetched live.</li>
+    </ul>
+    <p class="foot">This is a ranking aid, not investment advice. An implied value is a comparison, not a valuation, and a farm plan is work, not a guarantee of an airdrop.</p>
+  </section>
+</main>
+<footer>
+  <p>Token Radar · model radar-2 · data: sealed DefiLlama snapshot · <span id="foot-asof">—</span></p>
+</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
